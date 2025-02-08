@@ -26,7 +26,6 @@ local open = function(entries)
 		vim.cmd("tabclose")
 		local entry = state.active()
 		vim.api.nvim_set_current_buf(entry.bufnr)
-		vim.print("moving", string.format("normal! %dgg^", entry.lnum))
 		vim.cmd(string.format("normal! %dgg^zz", entry.lnum + 1))
 	end)
 

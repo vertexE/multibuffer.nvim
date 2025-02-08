@@ -119,7 +119,6 @@ M.open = function(state, ctx)
 	end
 
 	local max_height = vim.api.nvim_win_get_height(ctx.winr)
-	vim.print(string.format("max_height %d", max_height))
 	for i, entry in ipairs(state.entries) do
 		if (i * (PREVIEW_SIZE + 1)) > max_height then
 			break
