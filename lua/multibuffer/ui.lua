@@ -39,7 +39,7 @@ end
 --- @param state multibuffer.State
 M.next = function(state)
 	if cursor == #windows then
-		vim.notify("hit last window", vim.log.levels.ERROR, {})
+		vim.notify("multibuffer: last item", vim.log.levels.INFO, {})
 		return
 	end
 	if cursor < (math.floor(#windows / 2) + 1) then
@@ -114,7 +114,7 @@ end
 --- @param ctx multibuffer.Context
 M.open = function(state, ctx)
 	if #state.entries == 0 then
-		vim.notify("nothing to show", vim.log.levels.WARN, {})
+		vim.notify("multibuffer: no items", vim.log.levels.WARN, {})
 		return
 	end
 
@@ -134,7 +134,6 @@ M.open = function(state, ctx)
 			width = vim.api.nvim_win_get_width(0),
 			zindex = 1,
 		})
-		-- vim.cmd(string.format("normal! %dgg^", entry.lnum))
 		scroll_in(_winr, entry.lnum + 1)
 		vim.wo[_winr].winbar = ""
 		table.insert(windows, _winr)
@@ -143,7 +142,6 @@ M.open = function(state, ctx)
 			bufnr = entry.bufnr,
 			lnum = entry.lnum,
 		}
-		-- vim.api.nvim_set_current_win(ctx.winr) -- go back to parent window
 	end
 	vim.api.nvim_set_current_win(windows[1])
 end
