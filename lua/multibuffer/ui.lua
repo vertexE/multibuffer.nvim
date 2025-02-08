@@ -21,6 +21,13 @@ local windows = {}
 
 local cursor = 1
 
+--- @param bufnr integer
+--- @return string
+local path = function(bufnr)
+	local name = vim.api.nvim_buf_get_name(bufnr)
+	return vim.fn.fnamemodify(name, ":~:.")
+end
+
 --- @param lnum integer
 local scroll_in = function(winr, lnum)
 	local prev_winr = vim.api.nvim_get_current_win()
@@ -62,6 +69,8 @@ M.next = function(state)
 					scroll_in(_winr, placement[_winr].lnum + 1)
 				end
 				vim.wo[_winr].winbar = ""
+				local entry = placement[_winr]
+				vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format("%d", entry.lnum) })
 			end
 		end
 	end
@@ -116,9 +125,8 @@ M.open = function(state, ctx)
 			break
 		end
 
-		vim.print(string.format("row placement is %d", ((i - 1) * PREVIEW_SIZE) + (i == 1 and 1 or i * 2)))
-
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
+			title = path(entry.bufnr) .. string.format(":%d", entry.lnum),
 			border = "rounded",
 			relative = "win",
 			row = ((i - 1) * (PREVIEW_SIZE + 2)),

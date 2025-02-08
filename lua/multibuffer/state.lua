@@ -24,6 +24,15 @@ M.set_entries = function(entries)
 	state.entries = entries
 end
 
+--- @return multibuffer.Entry
+M.active = function()
+	if #state.entries == 0 or state.pos > #state.entries then
+		vim.notify("unable to get active, invalid state", vim.log.levels.ERROR, {})
+	end
+
+	return state.entries[state.pos]
+end
+
 --- @return multibuffer.State
 M.state = function()
 	return state

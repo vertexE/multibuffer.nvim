@@ -8,13 +8,14 @@ M.symbol_references_entries = function(on_load)
 			local references = result.items
 			for i, reference in ipairs(references) do
 				local bufnr = vim.fn.bufadd(reference.filename)
+				local path = vim.fn.fnamemodify(reference.filename, ":~:.")
 				table.insert(entries, {
 					index = i,
 					bufnr = bufnr,
 					lnum = reference.lnum - 1,
 					col = reference.col,
 					msg = reference.text,
-					fp = reference.filename,
+					fp = path,
 				})
 			end
 			on_load(entries)
