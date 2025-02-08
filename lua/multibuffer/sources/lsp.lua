@@ -1,10 +1,26 @@
--- vim.lsp.buf.references(nil, {on_list = function(opts) vim.print(opts) end})
--- TODO: perfect enhancement I can make to my multibuffer
--- but I actually need to make it better
--- probably a centered float that displays one at a time
--- but I can tab through it?
--- easier to handle refreshing if I did it that way too!
 local M = {}
+
+--- @param on_load fun(entries: table<multibuffer.Entry>)
+M.symbol_references_entries = function(on_load)
+	vim.lsp.buf.references(nil, {
+		on_list = function(result)
+			local entries = {}
+			local references = result.items
+			for i, reference in ipairs(references) do
+				local bufnr = vim.fn.bufadd(reference.filename)
+				table.insert(entries, {
+					index = i,
+					bufnr = bufnr,
+					lnum = reference.lnum - 1,
+					col = reference.col,
+					msg = reference.text,
+					fp = reference.filename,
+				})
+			end
+			on_load(entries)
+		end,
+	})
+end
 
 --- @return table<multibuffer.Entry>
 M.diagnostic_entries = function()

@@ -47,8 +47,16 @@ local open = function(entries)
 	})
 end
 
+M.lsp_references = function()
+	state.reset()
+	ui.reset()
+	lsp.symbol_references_entries(function(entries)
+		open(entries)
+	end)
+end
+
 M.lsp_diagnostics = function()
-	state.reset() -- ensure we have a clean slate
+	state.reset()
 	ui.reset()
 	open(lsp.diagnostic_entries())
 end
