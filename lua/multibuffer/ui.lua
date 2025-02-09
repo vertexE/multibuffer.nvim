@@ -70,7 +70,7 @@ M.next = function(state)
 				end
 				vim.wo[_winr].winbar = ""
 				local entry = placement[_winr]
-				vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format("%d", entry.lnum) })
+				vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format(":%d", entry.lnum) })
 			end
 		end
 	end
