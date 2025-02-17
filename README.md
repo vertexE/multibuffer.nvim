@@ -1,9 +1,15 @@
 # multibuffer.nvim
 
-This plugin opens as many floating windows as possible in a new tab. The floats are
-set to the buffers corresponding to the given action
-- lsp diagnostics / references
-- ...
+This plugin experiments with multibuffers. A tab of floats are
+set to the buffers corresponding to a given action.
+
+
+**Currently supported actions**
+- lsp diagnostics 
+- symbol usage
+
+> [!caution]
+> plugin still in a "draft" state and is designed for my needs.
 
 ## Usage
 
