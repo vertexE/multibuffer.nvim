@@ -9,6 +9,7 @@ local keys = { -- TODO: these belong in setup options
 	"<tab>",
 	"<s-tab>",
 	"<enter>",
+	"q",
 }
 
 local _state = {
@@ -29,7 +30,7 @@ local open = function(entries)
 	})
 	local previous_keymaps = {}
 	for _, keymap in ipairs(vim.api.nvim_get_keymap("n")) do
-		if keymap.lhs == "<tab>" or keymap.lhs == "<s-tab>" or keymap.lhs == "<enter>" then
+		if vim.tbl_contains(keys, keymap.lhs) then
 			previous_keymaps[keymap.lhs] = keymap
 		end
 	end
@@ -51,6 +52,12 @@ local open = function(entries)
 		ui.previous(state.state())
 	end)
 
+	vim.keymap.set("n", "q", function()
+		if tbnr == vim.api.nvim_get_current_tabpage() then
+			vim.cmd("tabclose")
+		end
+	end)
+
 	vim.api.nvim_create_autocmd("TabClosed", {
 		group = vim.api.nvim_create_augroup("multibuffer.TabClosed", { clear = true }),
 		callback = function()
@@ -62,7 +69,7 @@ local open = function(entries)
 			if not vim.tbl_contains(vim.api.nvim_list_tabpages(), tbnr) then
 				for _, key in pairs(keys) do
 					if previous_keymaps[key] then
-						vim.fn.mapset(map)
+						vim.fn.mapset(previous_keymaps[key])
 					else
 						vim.api.nvim_del_keymap("n", key)
 					end
