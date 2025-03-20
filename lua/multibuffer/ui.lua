@@ -32,7 +32,7 @@ end
 local scroll_in = function(winr, lnum)
 	local prev_winr = vim.api.nvim_get_current_win()
 	vim.api.nvim_set_current_win(winr)
-	vim.cmd(string.format("normal! %dgg^", lnum))
+	vim.cmd(string.format("normal! %dgg^zz", lnum))
 	vim.api.nvim_set_current_win(prev_winr)
 end
 
@@ -74,7 +74,6 @@ M.next = function(state)
 			end
 		end
 	end
-	vim.cmd("normal! zz")
 end
 
 --- @param state multibuffer.State
@@ -109,7 +108,6 @@ M.previous = function(state)
 			vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format(":%d", entry.lnum) })
 		end
 	end
-	vim.cmd("normal! zz")
 end
 
 --- open floats to fill the current window based on PREVIEW_SIZE
