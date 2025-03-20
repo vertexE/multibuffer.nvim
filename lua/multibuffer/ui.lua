@@ -74,6 +74,7 @@ M.next = function(state)
 			end
 		end
 	end
+	vim.cmd("normal! zz")
 end
 
 --- @param state multibuffer.State
@@ -108,6 +109,7 @@ M.previous = function(state)
 			vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format(":%d", entry.lnum) })
 		end
 	end
+	vim.cmd("normal! zz")
 end
 
 --- open floats to fill the current window based on PREVIEW_SIZE
