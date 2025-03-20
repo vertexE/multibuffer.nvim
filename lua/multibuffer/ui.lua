@@ -103,7 +103,7 @@ M.previous = function(state)
 				vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
 				scroll_in(_winr, placement[_winr].lnum + 1)
 			end
-            vim.wo[_winr].winbar = ""
+			vim.wo[_winr].winbar = ""
 			local entry = placement[_winr]
 			vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format(":%d", entry.lnum) })
 		end
@@ -138,6 +138,7 @@ M.open = function(state, ctx)
 		})
 		scroll_in(_winr, entry.lnum + 1)
 		vim.wo[_winr].winbar = ""
+		vim.wo[_winr].scrolloff = 0
 		table.insert(windows, _winr)
 		placement[_winr] = {
 			id = entry.index,
