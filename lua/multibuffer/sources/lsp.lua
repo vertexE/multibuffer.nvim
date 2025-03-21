@@ -1,5 +1,27 @@
 local M = {}
 
+--- @param t table
+--- @param comparator fun(a: any,b: any):boolean
+local group_by = function(t, comparator)
+	local grouped = {}
+	local group = {}
+	for _, v in ipairs(t) do
+		if #group > 0 and comparator(group[1], v) then -- if you belong in the current group
+			table.insert(group, v)
+		elseif #group > 0 then -- if you don't belong in the current group
+			table.insert(grouped, group) -- insert the previous group
+			group = { v } -- create a new group
+		else -- for when we have an empty group (only run once)
+			table.insert(group, v)
+		end
+	end
+	if #group > 0 then
+		table.insert(grouped, group)
+	end
+
+	return grouped
+end
+
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_references_entries = function(on_load)
 	vim.lsp.buf.references(nil, {
@@ -26,9 +48,16 @@ end
 --- @return table<multibuffer.Entry>
 M.diagnostic_entries = function()
 	local diagnostics = vim.diagnostic.get(nil, { severity = "ERROR" })
+	local diagnostic_groups = group_by(diagnostics, function(a, b)
+		-- TODO: can pull this up into a config option
+		return math.abs(a.lnum - b.lnum) < 2
+	end)
+
 	local entries = {}
-	for i, diagnostic in ipairs(diagnostics) do
-		if diagnostic.bufnr then
+	local i = 1
+	for _, group in ipairs(diagnostic_groups) do
+		local diagnostic = group[1]
+		if diagnostic and diagnostic.bufnr then
 			local name = vim.api.nvim_buf_get_name(diagnostic.bufnr)
 			local path = vim.fn.fnamemodify(name, ":~:.")
 			table.insert(entries, {
@@ -39,8 +68,10 @@ M.diagnostic_entries = function()
 				msg = diagnostic.message,
 				fp = path,
 			})
+			i = i + 1
 		end
 	end
+
 	return entries
 end
 
