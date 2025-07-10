@@ -4,6 +4,7 @@ local ui = require("multibuffer.ui")
 local state = require("multibuffer.state")
 
 local lsp = require("multibuffer.sources.lsp")
+local editor = require("multibuffer.sources.editor")
 
 local keys = { -- TODO: these belong in setup options
 	"<tab>",
@@ -99,6 +100,16 @@ M.lsp_diagnostics = function()
 	state.reset()
 	ui.reset()
 	open(lsp.diagnostic_entries())
+end
+
+M.marks = function()
+	if _state.open then
+		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
+		return
+	end
+	state.reset()
+	ui.reset()
+	open(editor.marks())
 end
 
 return M
