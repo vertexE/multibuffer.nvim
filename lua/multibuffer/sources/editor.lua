@@ -7,7 +7,6 @@ M.marks = function()
 	local entries = {}
 	for _, mark in ipairs(marks) do
 		local pos = vim.api.nvim_buf_get_mark(bufnr, mark)
-		vim.print(mark, pos)
 		local name = vim.api.nvim_buf_get_name(bufnr)
 		local path = vim.fn.fnamemodify(name, ":~:.")
 		if pos[1] ~= 0 or pos[2] ~= 0 then
