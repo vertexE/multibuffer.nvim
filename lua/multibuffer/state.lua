@@ -7,6 +7,7 @@
 --- @field bufnr integer
 --- @field lnum integer
 --- @field col? integer
+--- @field severity? vim.diagnostic.Severity
 --- @field msg string
 --- @field fp string filepath
 

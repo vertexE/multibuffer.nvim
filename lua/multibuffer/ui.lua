@@ -10,6 +10,8 @@ local PREVIEW_SIZE = 7
 --- @field id integer
 --- @field bufnr integer
 --- @field lnum integer
+--- @field msg string
+--- @field severity ?vim.diagnostic.Severity
 
 --- @type table<integer,multibuffer.Placement>
 local placement = {}
@@ -19,13 +21,29 @@ local windows = {}
 
 local cursor = 1
 
+local sev_to_icon = {
+	[vim.diagnostic.severity.ERROR] = "󰅙 ",
+	[vim.diagnostic.severity.WARN] = " ",
+	[vim.diagnostic.severity.HINT] = " ",
+	[vim.diagnostic.severity.INFO] = " ",
+}
+
+local sev_to_hl = {
+	[vim.diagnostic.severity.ERROR] = "DiagnosticError",
+	[vim.diagnostic.severity.WARN] = "DiagnosticWarn",
+	[vim.diagnostic.severity.HINT] = "DiagnosticHint",
+	[vim.diagnostic.severity.INFO] = "DiagnosticInfo",
+}
+
 local title = function(entry)
 	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
 	local name = vim.fn.fnamemodify(buf_name, ":t")
+	local hl_group = entry.severity and sev_to_hl[entry.severity] or "MiniIconsPurple"
 	return {
 		{ name .. string.format(":%d", entry.lnum), "Comment" },
 		{ " ", "Comment" },
-		{ entry.msg or "", "MiniIconsRed" },
+		{ entry.severity and sev_to_icon[entry.severity] or "", hl_group },
+		{ entry.msg or "", hl_group },
 	}
 end
 
@@ -40,7 +58,6 @@ end
 --- @param state multibuffer.State
 M.next = function(state)
 	if cursor == #windows then
-		vim.notify("multibuffer: last item", vim.log.levels.INFO, {})
 		return
 	end
 	if cursor < (math.floor(#windows / 2) + 1) then
@@ -63,6 +80,7 @@ M.next = function(state)
 						bufnr = next_entry.bufnr,
 						lnum = next_entry.lnum,
 						msg = next_entry.msg,
+						severity = next_entry.severity,
 					}
 				else
 					local next_pl = placement[windows[i + 1]]
@@ -98,6 +116,7 @@ M.previous = function(state)
 					bufnr = prev_entry.bufnr,
 					lnum = prev_entry.lnum,
 					msg = prev_entry.msg,
+					severity = prev_entry.severity,
 				}
 				vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
 				scroll_in(_winr, prev_entry.lnum + 1)
@@ -151,6 +170,7 @@ M.open = function(state, ctx)
 			bufnr = entry.bufnr,
 			lnum = entry.lnum,
 			msg = entry.msg,
+			severity = entry.severity,
 		}
 	end
 	vim.api.nvim_set_current_win(windows[1])

@@ -64,6 +64,7 @@ M.diagnostic_entries = function()
 				index = i,
 				bufnr = diagnostic.bufnr,
 				lnum = diagnostic.lnum,
+				severity = diagnostic.severity,
 				col = diagnostic.col,
 				msg = diagnostic.message,
 				fp = path,
