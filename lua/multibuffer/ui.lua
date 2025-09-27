@@ -19,16 +19,14 @@ local windows = {}
 
 local cursor = 1
 
---- @param bufnr integer
---- @return string
-local path = function(bufnr)
-	local name = vim.api.nvim_buf_get_name(bufnr)
-	return vim.fn.fnamemodify(name, ":~:.")
-end
-
-local name = function(bufnr)
-	local name = vim.api.nvim_buf_get_name(bufnr)
-	return vim.fn.fnamemodify(name, ":t")
+local title = function(entry)
+	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
+	local name = vim.fn.fnamemodify(buf_name, ":t")
+	return {
+		{ name .. string.format(":%d", entry.lnum), "Comment" },
+		{ " ", "Comment" },
+		{ entry.msg or "", "MiniIconsRed" },
+	}
 end
 
 --- @param lnum integer
@@ -64,6 +62,7 @@ M.next = function(state)
 						id = next_entry.index,
 						bufnr = next_entry.bufnr,
 						lnum = next_entry.lnum,
+						msg = next_entry.msg,
 					}
 				else
 					local next_pl = placement[windows[i + 1]]
@@ -73,7 +72,7 @@ M.next = function(state)
 				end
 				vim.wo[_winr].winbar = ""
 				local entry = placement[_winr]
-				vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format(":%d", entry.lnum) })
+				vim.api.nvim_win_set_config(_winr, { title = title(entry) })
 			end
 		end
 	end
@@ -98,6 +97,7 @@ M.previous = function(state)
 					id = prev_entry.index,
 					bufnr = prev_entry.bufnr,
 					lnum = prev_entry.lnum,
+					msg = prev_entry.msg,
 				}
 				vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
 				scroll_in(_winr, prev_entry.lnum + 1)
@@ -108,7 +108,7 @@ M.previous = function(state)
 			end
 			vim.wo[_winr].winbar = ""
 			local entry = placement[_winr]
-			vim.api.nvim_win_set_config(_winr, { title = path(entry.bufnr) .. string.format(":%d", entry.lnum) })
+			vim.api.nvim_win_set_config(_winr, { title = title(entry) })
 		end
 	end
 end
@@ -133,12 +133,8 @@ M.open = function(state, ctx)
 		end
 
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
-			title = {
-				{ name(entry.bufnr) .. string.format(":%d", entry.lnum), "MiniIconsRed" },
-				{ " ", "Comment" },
-				{ entry.msg, "Comment" },
-			},
-			border = { " ", " ", " ", " ", " ", " ", " ", " " },
+			title = title(entry),
+			border = { " ", " ", " ", " ", " ", " ", " ", " " }, -- ─
 			relative = "win",
 			row = ((i - 1) * (PREVIEW_SIZE + 2)),
 			col = 0,
@@ -154,6 +150,7 @@ M.open = function(state, ctx)
 			id = entry.index,
 			bufnr = entry.bufnr,
 			lnum = entry.lnum,
+			msg = entry.msg,
 		}
 	end
 	vim.api.nvim_set_current_win(windows[1])
