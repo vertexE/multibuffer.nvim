@@ -47,7 +47,7 @@ end
 
 --- @return table<multibuffer.Entry>
 M.diagnostic_entries = function()
-	local diagnostics = vim.diagnostic.get(nil, { severity = "ERROR" })
+	local diagnostics = vim.diagnostic.get(nil)
 	local diagnostic_groups = group_by(diagnostics, function(a, b)
 		-- TODO: can pull this up into a config option
 		return math.abs(a.lnum - b.lnum) < 2

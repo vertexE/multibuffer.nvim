@@ -12,9 +12,7 @@ local PREVIEW_SIZE = 7
 --- @field lnum integer
 
 --- @type table<integer,multibuffer.Placement>
-local placement = {
-	-- _winr = bufnr, ?? do I need lnum, id
-}
+local placement = {}
 
 --- @type table<integer>
 local windows = {}
@@ -26,6 +24,11 @@ local cursor = 1
 local path = function(bufnr)
 	local name = vim.api.nvim_buf_get_name(bufnr)
 	return vim.fn.fnamemodify(name, ":~:.")
+end
+
+local name = function(bufnr)
+	local name = vim.api.nvim_buf_get_name(bufnr)
+	return vim.fn.fnamemodify(name, ":t")
 end
 
 --- @param lnum integer
@@ -110,6 +113,9 @@ M.previous = function(state)
 	end
 end
 
+-- TODO: further improve disabling scroll and if you try to go out of bounds it will
+-- take you to the next item
+
 --- open floats to fill the current window based on PREVIEW_SIZE
 --- setting the cursor into the top window
 --- @param state multibuffer.State
@@ -127,8 +133,12 @@ M.open = function(state, ctx)
 		end
 
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
-			title = path(entry.bufnr) .. string.format(":%d", entry.lnum),
-			border = "rounded",
+			title = {
+				{ name(entry.bufnr) .. string.format(":%d", entry.lnum), "MiniIconsRed" },
+				{ " ", "Comment" },
+				{ entry.msg, "Comment" },
+			},
+			border = { " ", " ", " ", " ", " ", " ", " ", " " },
 			relative = "win",
 			row = ((i - 1) * (PREVIEW_SIZE + 2)),
 			col = 0,
