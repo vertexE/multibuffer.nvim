@@ -45,9 +45,10 @@ M.symbol_references_entries = function(on_load)
 	})
 end
 
+--- @param bufnr integer|nil
 --- @return table<multibuffer.Entry>
-M.diagnostic_entries = function()
-	local diagnostics = vim.diagnostic.get(nil)
+M.diagnostic_entries = function(bufnr)
+	local diagnostics = vim.diagnostic.get(bufnr)
 	local diagnostic_groups = group_by(diagnostics, function(a, b)
 		-- TODO: can pull this up into a config option
 		return math.abs(a.lnum - b.lnum) < 2

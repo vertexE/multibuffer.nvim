@@ -92,14 +92,15 @@ M.lsp_references = function()
 	end)
 end
 
-M.lsp_diagnostics = function()
+---@param bufnr integer|nil
+M.lsp_diagnostics = function(bufnr)
 	if _state.open then
 		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
 		return
 	end
 	state.reset()
 	ui.reset()
-	open(lsp.diagnostic_entries())
+	open(lsp.diagnostic_entries(bufnr))
 end
 
 M.marks = function()
