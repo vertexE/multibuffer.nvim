@@ -98,6 +98,7 @@ M.symbol_definiton_entries = function(on_load)
 			local fp_to_buf = {}
 			for i, symbol in ipairs(result) do
 				local bufnr = -1
+				vim.print(result)
 				if fp_to_buf[symbol.targetUri] then
 					bufnr = fp_to_buf[symbol.targetUri]
 				else
