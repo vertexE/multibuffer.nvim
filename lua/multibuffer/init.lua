@@ -132,6 +132,11 @@ M.lsp_definitions = function()
 	state.reset()
 	ui.reset()
 	lsp.symbol_definiton_entries(function(entries)
+		if #entries == 1 then
+			vim.lsp.buf.definition()
+			return
+		end
+
 		open(entries)
 	end)
 end
