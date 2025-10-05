@@ -109,14 +109,12 @@ M.symbol_definiton_entries = function(on_load)
 					vim.cmd(string.format("edit %s", symbol.targetUri))
 				end)
 				local path = vim.fn.fnamemodify(symbol.targetUri, ":~:.")
-				local line = symbol.targetRange.start.line
-				local preview = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
 				table.insert(entries, {
 					index = i,
 					bufnr = bufnr,
-					lnum = line,
+					lnum = symbol.targetRange.start.line,
 					col = symbol.targetRange.start.character,
-					msg = preview,
+					msg = "",
 					fp = path,
 				})
 			end
