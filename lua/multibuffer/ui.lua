@@ -38,7 +38,6 @@ local sev_to_hl = {
 local title = function(entry)
 	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
 	local name = vim.fn.fnamemodify(buf_name, ":t")
-	vim.print(vim.api.nvim_buf_get_lines(entry.bufnr, entry.lnum - 1, entry.lnum, false))
 	local hl_group = entry.severity and sev_to_hl[entry.severity] or "MiniIconsPurple"
 	return {
 		{ name .. string.format(":%d", entry.lnum), "Comment" },
