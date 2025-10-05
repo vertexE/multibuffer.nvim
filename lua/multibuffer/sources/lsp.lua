@@ -96,7 +96,7 @@ M.symbol_definiton_entries = function(on_load)
 		function(_, result, _, _)
 			local entries = {}
 			for i, symbol in ipairs(result) do
-				local bufnr = vim.fn.bufadd(vim.uri_from_fname(symbol.targetUri))
+				local bufnr = vim.uri_to_bufnr(symbol.targetUri)
 				vim.fn.bufload(bufnr)
 				local preview = vim.api.nvim_buf_get_lines(
 					bufnr,
