@@ -93,40 +93,7 @@ M.symbol_definiton_entries = function(on_load)
 		0,
 		"textDocument/definition",
 		vim.lsp.util.make_position_params(nil, client_encoding("textDocument/definition")),
-		function(err, result, ctx, config)
-			-- {
-			--     originSelectionRange = {
-			--       ["end"] = {
-			--         character = 26,
-			--         line = 103
-			--       },
-			--       start = {
-			--         character = 2,
-			--         line = 103
-			--       }
-			--     },
-			--     targetRange = {
-			--       ["end"] = {
-			--         character = 3,
-			--         line = 101
-			--       },
-			--       start = {
-			--         character = 29,
-			--         line = 90
-			--       }
-			--     },
-			--     targetSelectionRange = {
-			--       ["end"] = {
-			--         character = 3,
-			--         line = 101
-			--       },
-			--       start = {
-			--         character = 29,
-			--         line = 90
-			--       }
-			--     },
-			--     targetUri = "file:///Users/jfdenton/work/multibuffer.nvim/lua/multibuffer/sources/lsp.lua"
-			--   }
+		function(_, result, _, _)
 			local entries = {}
 			local fp_to_buf = {}
 			for i, symbol in ipairs(result) do
