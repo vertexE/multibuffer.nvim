@@ -5,6 +5,7 @@ local state = require("multibuffer.state")
 
 local lsp = require("multibuffer.sources.lsp")
 local editor = require("multibuffer.sources.editor")
+local qfx = require("multibuffer.sources.quickfix")
 
 local keys = { -- TODO: these belong in setup options
 	"<tab>",
@@ -111,6 +112,28 @@ M.marks = function()
 	state.reset()
 	ui.reset()
 	open(editor.marks())
+end
+
+M.quickfix = function()
+	if _state.open then
+		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
+		return
+	end
+	state.reset()
+	ui.reset()
+	open(qfx.quickfix_entries())
+end
+
+M.lsp_definitions = function()
+	if _state.open then
+		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
+		return
+	end
+	state.reset()
+	ui.reset()
+	lsp.symbol_definiton_entries(function(entries)
+		open(entries)
+	end)
 end
 
 return M

@@ -22,6 +22,16 @@ local group_by = function(t, comparator)
 	return grouped
 end
 
+local client_encoding = function(method)
+	for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+		if client:supports_method(method) then
+			return client.offset_encoding or "utf-16"
+		end
+	end
+
+	return "utf-16"
+end
+
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_references_entries = function(on_load)
 	vim.lsp.buf.references(nil, {
@@ -75,6 +85,77 @@ M.diagnostic_entries = function(bufnr)
 	end
 
 	return entries
+end
+
+--- @param on_load fun(entries: table<multibuffer.Entry>)
+M.symbol_definiton_entries = function(on_load)
+	vim.lsp.buf_request(
+		0,
+		"textDocument/definition",
+		vim.lsp.util.make_position_params(nil, client_encoding("textDocument/definition")),
+		function(err, result, ctx, config)
+			-- {
+			--     originSelectionRange = {
+			--       ["end"] = {
+			--         character = 26,
+			--         line = 103
+			--       },
+			--       start = {
+			--         character = 2,
+			--         line = 103
+			--       }
+			--     },
+			--     targetRange = {
+			--       ["end"] = {
+			--         character = 3,
+			--         line = 101
+			--       },
+			--       start = {
+			--         character = 29,
+			--         line = 90
+			--       }
+			--     },
+			--     targetSelectionRange = {
+			--       ["end"] = {
+			--         character = 3,
+			--         line = 101
+			--       },
+			--       start = {
+			--         character = 29,
+			--         line = 90
+			--       }
+			--     },
+			--     targetUri = "file:///Users/jfdenton/work/multibuffer.nvim/lua/multibuffer/sources/lsp.lua"
+			--   }
+			local entries = {}
+			local fp_to_buf = {}
+			for i, symbol in ipairs(result) do
+				local bufnr = -1
+				if fp_to_buf[symbol.targetUri] then
+					bufnr = fp_to_buf[symbol.targetUri]
+				else
+					bufnr = vim.api.nvim_create_buf(true, false)
+					fp_to_buf[symbol.targetUri] = bufnr
+				end
+
+				vim.api.nvim_buf_call(bufnr, function()
+					vim.cmd(string.format("edit %s", symbol.targetUri))
+				end)
+				local path = vim.fn.fnamemodify(symbol.targetUri, ":~:.")
+				local line = symbol.targetRange.start.line
+				local preview = vim.api.nvim_buf_get_lines(bufnr, line - 1, line, false)[1]
+				table.insert(entries, {
+					index = i,
+					bufnr = bufnr,
+					lnum = line,
+					col = symbol.targetRange.start.character,
+					msg = preview,
+					fp = path,
+				})
+			end
+			on_load(entries)
+		end
+	)
 end
 
 return M
