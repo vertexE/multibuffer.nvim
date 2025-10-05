@@ -102,12 +102,12 @@ M.symbol_definiton_entries = function(on_load)
 					bufnr = fp_to_buf[symbol.targetUri]
 				else
 					bufnr = vim.api.nvim_create_buf(true, false)
+					vim.api.nvim_buf_call(bufnr, function()
+						vim.cmd(string.format("edit %s", symbol.targetUri))
+					end)
 					fp_to_buf[symbol.targetUri] = bufnr
 				end
 
-				vim.api.nvim_buf_call(bufnr, function()
-					vim.cmd(string.format("edit %s", symbol.targetUri))
-				end)
 				local path = vim.fn.fnamemodify(symbol.targetUri, ":~:.")
 				table.insert(entries, {
 					index = i,
