@@ -5,6 +5,7 @@ local state = require("multibuffer.state")
 
 local lsp = require("multibuffer.sources.lsp")
 local editor = require("multibuffer.sources.editor")
+local qfx = require("multibuffer.sources.quickfix")
 
 local keys = { -- TODO: these belong in setup options
 	"<tab>",
@@ -71,6 +72,13 @@ local open = function(entries)
 				for _, key in pairs(keys) do
 					if previous_keymaps[key] then
 						vim.fn.mapset(previous_keymaps[key])
+						local keymap = previous_keymaps[key]
+						vim.keymap.set("n", key, keymap.callback or keymap.rhs, {
+							desc = keymap.desc,
+							silent = keymap.silent,
+							noremap = keymap.noremap,
+							nowait = keymap.nowait,
+						})
 					else
 						vim.api.nvim_del_keymap("n", key)
 					end
@@ -111,6 +119,44 @@ M.marks = function()
 	state.reset()
 	ui.reset()
 	open(editor.marks())
+end
+
+M.quickfix = function()
+	if _state.open then
+		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
+		return
+	end
+	state.reset()
+	ui.reset()
+	open(qfx.quickfix_entries())
+end
+
+--- open multibuffer for lsp definitions, optionally filtered by the given function
+--- @param filter ?function(multibuffer.Entry): boolean
+M.lsp_definitions = function(filter)
+	if _state.open then
+		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
+		return
+	end
+	state.reset()
+	ui.reset()
+	lsp.symbol_definiton_entries(function(entries)
+		if #entries == 1 then
+			vim.lsp.buf.definition()
+			return
+		end
+
+		if filter then
+			local filtered_entries = vim.iter(entries)
+				:filter(function(e)
+					return filter(e)
+				end)
+				:totable()
+			open(filtered_entries)
+		else
+			open(entries)
+		end
+	end)
 end
 
 return M
