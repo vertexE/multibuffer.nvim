@@ -141,6 +141,11 @@ M.lsp_definitions = function(filter)
 	state.reset()
 	ui.reset()
 	lsp.symbol_definiton_entries(function(entries)
+		if #entries == 0 then
+			vim.notify("no results")
+			return
+		end
+
 		if #entries == 1 then
 			vim.lsp.buf.definition()
 			return
