@@ -158,6 +158,7 @@ M.lsp_definitions = function(filter)
 				end)
 				:totable()
 			open(filtered_entries)
+			return
 		else
 			open(entries)
 		end

@@ -95,26 +95,22 @@ M.symbol_definiton_entries = function(on_load)
 		vim.lsp.util.make_position_params(nil, client_encoding("textDocument/definition")),
 		function(_, result, _, _)
 			local entries = {}
-			local fp_to_buf = {}
 			for i, symbol in ipairs(result) do
-				local bufnr = -1
-				if fp_to_buf[symbol.targetUri] then
-					bufnr = fp_to_buf[symbol.targetUri]
-				else
-					bufnr = vim.api.nvim_create_buf(true, false)
-					vim.api.nvim_buf_call(bufnr, function()
-						vim.cmd(string.format("edit %s", symbol.targetUri))
-					end)
-					fp_to_buf[symbol.targetUri] = bufnr
-				end
-
-				local path = vim.fn.fnamemodify(symbol.targetUri, ":~:.")
+				local bufnr = vim.uri_to_bufnr(symbol.targetUri)
+				vim.fn.bufload(bufnr)
+				local preview = vim.api.nvim_buf_get_lines(
+					bufnr,
+					symbol.targetRange.start.line,
+					symbol.targetRange.start.line + 1,
+					false
+				)[1] or ""
+				local path = symbol.targetUri:gsub("^file://", "", 1)
 				table.insert(entries, {
 					index = i,
 					bufnr = bufnr,
 					lnum = symbol.targetRange.start.line,
 					col = symbol.targetRange.start.character,
-					msg = "",
+					msg = preview,
 					fp = path,
 				})
 			end
