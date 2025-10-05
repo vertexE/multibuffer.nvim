@@ -100,8 +100,8 @@ M.symbol_definiton_entries = function(on_load)
 				vim.fn.bufload(bufnr)
 				local preview = vim.api.nvim_buf_get_lines(
 					bufnr,
-					symbol.targetRange.start.line - 1,
 					symbol.targetRange.start.line,
+					symbol.targetRange.start.line + 1,
 					false
 				)[1] or ""
 				local path = symbol.targetUri:gsub("^file://", "", 1)
