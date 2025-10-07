@@ -94,6 +94,9 @@ M.symbol_definiton_entries = function(on_load)
 		"textDocument/definition",
 		vim.lsp.util.make_position_params(nil, client_encoding("textDocument/definition")),
 		function(_, result, _, _)
+			if not result then
+				on_load({})
+			end
 			local entries = {}
 			for i, symbol in ipairs(result) do
 				local bufnr = vim.uri_to_bufnr(symbol.targetUri)
