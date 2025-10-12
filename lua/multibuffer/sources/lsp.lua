@@ -1,5 +1,7 @@
 local M = {}
 
+local config = require("multibuffer.config")
+
 --- @param t table
 --- @param comparator fun(a: any,b: any):boolean
 local group_by = function(t, comparator)
@@ -89,6 +91,7 @@ end
 
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_definiton_entries = function(on_load)
+	local should_filter_to_unique_by_line = config.options().lsp.definition.unique
 	vim.lsp.buf_request(
 		0,
 		"textDocument/definition",
@@ -96,7 +99,10 @@ M.symbol_definiton_entries = function(on_load)
 		function(_, result, _, _)
 			if not result then
 				on_load({})
+				return
 			end
+			--- @type table<string,string> mapping of file->ln, check if exact match
+			local have_seen = {}
 			local entries = {}
 			for i, symbol in ipairs(result) do
 				local bufnr = vim.uri_to_bufnr(symbol.targetUri)
@@ -108,14 +114,20 @@ M.symbol_definiton_entries = function(on_load)
 					false
 				)[1] or ""
 				local path = symbol.targetUri:gsub("^file://", "", 1)
-				table.insert(entries, {
-					index = i,
-					bufnr = bufnr,
-					lnum = symbol.targetRange.start.line,
-					col = symbol.targetRange.start.character,
-					msg = preview,
-					fp = path,
-				})
+
+				if should_filter_to_unique_by_line and have_seen[path] == symbol.targetRange.start.line then
+					--- continue
+				else
+					have_seen[path] = symbol.targetRange.start.line
+					table.insert(entries, {
+						index = i,
+						bufnr = bufnr,
+						lnum = symbol.targetRange.start.line,
+						col = symbol.targetRange.start.character,
+						msg = preview,
+						fp = path,
+					})
+				end
 			end
 			on_load(entries)
 		end

@@ -37,6 +37,8 @@ local open = function(entries)
 		end
 	end
 
+	vim.print(previous_keymaps)
+
 	vim.keymap.set("n", "<enter>", function()
 		vim.cmd("tabclose")
 		local entry = state.active()
