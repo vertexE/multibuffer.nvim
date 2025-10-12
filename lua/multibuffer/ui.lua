@@ -152,7 +152,7 @@ M.open = function(state, ctx)
 			break
 		end
 
-		local _winr = vim.api.vim_open_win(entry.bufnr, false, {
+		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
 			title = title(entry),
 			border = { " ", " ", " ", " ", " ", " ", " ", " " }, -- ─
 			relative = "win",
