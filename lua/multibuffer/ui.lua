@@ -21,20 +21,6 @@ local windows = {}
 
 local cursor = 1
 
-local sev_to_icon = {
-	[vim.diagnostic.severity.ERROR] = "󰅙 ",
-	[vim.diagnostic.severity.WARN] = " ",
-	[vim.diagnostic.severity.HINT] = " ",
-	[vim.diagnostic.severity.INFO] = " ",
-}
-
-local sev_to_hl = {
-	[vim.diagnostic.severity.ERROR] = "DiagnosticError",
-	[vim.diagnostic.severity.WARN] = "DiagnosticWarn",
-	[vim.diagnostic.severity.HINT] = "DiagnosticHint",
-	[vim.diagnostic.severity.INFO] = "DiagnosticInfo",
-}
-
 local title = function(entry)
 	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
 	local name = vim.fn.fnamemodify(buf_name, ":t")
