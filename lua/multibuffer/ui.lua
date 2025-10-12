@@ -36,16 +36,11 @@ local sev_to_hl = {
 }
 
 local title = function(entry)
-	return "test"
-	-- local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
-	-- local name = vim.fn.fnamemodify(buf_name, ":t")
-	-- -- local hl_group = entry.severity and sev_to_hl[entry.severity] or "MiniIconsPurple"
-	-- return {
-	-- 	{ name .. string.format(":%d", entry.lnum), "Comment" },
-	-- 	{ " ", "Comment" },
-	-- 	{ entry.severity and sev_to_icon[entry.severity] or "", "Comment" },
-	-- 	{ entry.msg or "", "Comment" },
-	-- }
+	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
+	local name = vim.fn.fnamemodify(buf_name, ":t")
+	return {
+		{ name .. string.format(":%d", entry.lnum), "Comment" },
+	}
 end
 
 --- @param lnum integer
