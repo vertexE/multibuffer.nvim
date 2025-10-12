@@ -36,15 +36,16 @@ local sev_to_hl = {
 }
 
 local title = function(entry)
-	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
-	local name = vim.fn.fnamemodify(buf_name, ":t")
-	local hl_group = entry.severity and sev_to_hl[entry.severity] or "MiniIconsPurple"
-	return {
-		{ name .. string.format(":%d", entry.lnum), "Comment" },
-		{ " ", "Comment" },
-		{ entry.severity and sev_to_icon[entry.severity] or "", hl_group },
-		{ entry.msg or "", hl_group },
-	}
+	return "test"
+	-- local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
+	-- local name = vim.fn.fnamemodify(buf_name, ":t")
+	-- -- local hl_group = entry.severity and sev_to_hl[entry.severity] or "MiniIconsPurple"
+	-- return {
+	-- 	{ name .. string.format(":%d", entry.lnum), "Comment" },
+	-- 	{ " ", "Comment" },
+	-- 	{ entry.severity and sev_to_icon[entry.severity] or "", "Comment" },
+	-- 	{ entry.msg or "", "Comment" },
+	-- }
 end
 
 --- @param lnum integer
@@ -151,7 +152,7 @@ M.open = function(state, ctx)
 			break
 		end
 
-		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
+		local _winr = vim.api.vim_open_win(entry.bufnr, false, {
 			title = title(entry),
 			border = { " ", " ", " ", " ", " ", " ", " ", " " }, -- ─
 			relative = "win",
