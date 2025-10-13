@@ -90,6 +90,8 @@ M.next = function(state)
 	end
 end
 
+-- BUG: special case for when I'm on the last item, I should just move the cursor to the middle float!
+
 --- @param state multibuffer.State
 M.previous = function(state)
 	if cursor == 1 then

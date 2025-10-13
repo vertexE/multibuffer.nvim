@@ -97,7 +97,7 @@ M.grep = function(resume)
 	draw.reset()
 	grep.search(function(entries)
 		if #entries == 0 then
-			vim.notify("no results")
+			vim.notify("no results", vim.log.levels.INFO)
 			return
 		end
 
@@ -136,7 +136,7 @@ M.lsp_definitions = function(filter)
 	draw.reset()
 	lsp.symbol_definiton_entries(function(entries)
 		if #entries == 0 then
-			vim.notify("no results")
+			vim.notify("no results", vim.log.levels.INFO)
 			return
 		end
 
