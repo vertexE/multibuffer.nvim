@@ -61,6 +61,7 @@ M.next = function(state)
 		else
 			if next_entry.lazy and next_entry.bufnr == -1 then
 				next_entry.bufnr = vim.uri_to_bufnr(vim.uri_from_fname(next_entry.fp))
+				vim.fn.bufload(next_entry.bufnr)
 			end
 			for i, _winr in ipairs(windows) do
 				if i == #windows then
@@ -148,6 +149,7 @@ M.open = function(state, ctx)
 
 		if entry.lazy and entry.bufnr == -1 then
 			entry.bufnr = vim.uri_to_bufnr(vim.uri_from_fname(entry.fp))
+			vim.fn.bufload(entry.bufnr)
 		end
 
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
