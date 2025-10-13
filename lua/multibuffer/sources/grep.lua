@@ -14,8 +14,8 @@ local parse_rg_line = function(i, line)
 	local path = segments[1]
 	path = path:gsub("^%./", "")
 	path = vim.fn.fnamemodify(path, ":p")
-	local lnum = segments[2] and tonumber(segments[2]) or nil
-	local col = segments[3] and tonumber(segments[3]) or nil
+	local lnum = segments[2] and (tonumber(segments[2]) - 1) or nil
+	local col = segments[3] and (tonumber(segments[3]) - 1) or nil
 	return { index = i, bufnr = -1, fp = path, lnum = lnum, col = col, lazy = true }
 end
 
