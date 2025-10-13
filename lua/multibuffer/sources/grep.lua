@@ -12,6 +12,7 @@ local parse_rg_line = function(i, line)
 	vim.print(segments)
 	-- local msg = table.concat(segments, ":", 4)
 	local path = segments[1]
+	path = path:gsub("^%./", "")
 	local lnum = segments[2] and tonumber(segments[2]) or nil
 	local col = segments[3] and tonumber(segments[3]) or nil
 	return { index = i, bufnr = -1, fp = path, lnum = lnum, col = col, lazy = true }
