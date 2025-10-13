@@ -38,7 +38,7 @@ M.search = function(on_load, use_previous)
 		}, { text = true }):wait()
 		vim.print(result)
 		if result.stdout then
-			local lines = vim.split(result.stdout, "\n")
+			local lines = vim.split(result.stdout, "\n", { trimempty = true })
 			local entries = {}
 			for i, line in ipairs(lines) do
 				table.insert(entries, parse_rg_line(i, line))
