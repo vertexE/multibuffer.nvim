@@ -7,9 +7,7 @@ local previous_entry_filepaths = {}
 ---@param line string
 ---@return multibuffer.Entry
 local parse_rg_line = function(i, line)
-	vim.print(line)
 	local segments = vim.split(line, ":")
-	vim.print(segments)
 	-- local msg = table.concat(segments, ":", 4)
 	local path = segments[1]
 	path = path:gsub("^%./", "")
@@ -36,7 +34,6 @@ M.search = function(on_load, use_previous)
 			input,
 			use_previous and table.concat(previous_entry_filepaths, " ") or ".",
 		}, { text = true }):wait()
-		vim.print(result)
 		if result.stdout then
 			local lines = vim.split(result.stdout, "\n", { trimempty = true })
 			local entries = {}
