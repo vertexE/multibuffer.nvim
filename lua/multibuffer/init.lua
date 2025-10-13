@@ -87,7 +87,7 @@ M.lsp_diagnostics = function(bufnr)
 	open(lsp.diagnostic_entries(bufnr))
 end
 
----@param resume boolean run the search again on the previous grep results
+---@param resume ?boolean run the search again on the previous grep results
 M.grep = function(resume)
 	if _state.open then
 		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
