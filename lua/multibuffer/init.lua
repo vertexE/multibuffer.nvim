@@ -96,6 +96,11 @@ M.grep = function(resume)
 	state.reset()
 	draw.reset()
 	grep.search(function(entries)
+		if #entries == 0 then
+			vim.notify("no results")
+			return
+		end
+
 		open(entries)
 	end, resume)
 end
