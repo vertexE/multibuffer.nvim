@@ -1,6 +1,14 @@
 local M = {}
 
-local previous_entry_filepaths = {}
+local prev_search_results = {}
+
+local keys = function(set)
+	local _keys = {}
+	for k, _ in pairs(set) do
+		table.insert(_keys, k)
+	end
+	return _keys
+end
 
 ---comment
 ---@param i integer
@@ -35,7 +43,7 @@ M.search = function(on_load, use_previous)
 			input,
 		}
 		if use_previous then
-			vim.list_extend(args, previous_entry_filepaths)
+			vim.list_extend(args, keys(prev_search_results))
 		else
 			table.insert(args, ".")
 		end
@@ -48,14 +56,11 @@ M.search = function(on_load, use_previous)
 				table.insert(entries, parse_rg_line(i, line))
 			end
 
-			previous_entry_filepaths = vim.iter(entries)
-				:map(function(entry)
-					return entry.fp
-				end)
-				:totable()
+			prev_search_results = {}
+			for _, entry in ipairs(entries) do
+				prev_search_results[entry.fp] = true
+			end
 			on_load(entries)
-		else
-			on_load({})
 		end
 	end)
 end
