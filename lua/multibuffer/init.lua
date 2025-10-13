@@ -1,12 +1,13 @@
 local M = {}
 
-local ui = require("multibuffer.ui")
+local draw = require("multibuffer.draw")
 local state = require("multibuffer.state")
 local config = require("multibuffer.config")
 
 local lsp = require("multibuffer.sources.lsp")
 local editor = require("multibuffer.sources.editor")
 local qfx = require("multibuffer.sources.quickfix")
+local grep = require("multibuffer.sources.grep")
 
 local _state = {
 	open = false,
@@ -27,7 +28,7 @@ local open = function(entries)
 	local winr = vim.api.nvim_get_current_win()
 	local bufnr = vim.api.nvim_get_current_buf()
 	state.set_entries(entries)
-	ui.open(state.state(), {
+	draw.open(state.state(), {
 		bufnr = bufnr,
 		winr = winr,
 	})
@@ -41,12 +42,12 @@ local open = function(entries)
 
 	vim.keymap.set("n", config.key("forward"), function()
 		state.next()
-		ui.next(state.state())
+		draw.next(state.state())
 	end)
 
 	vim.keymap.set("n", config.key("backward"), function()
 		state.previous()
-		ui.previous(state.state())
+		draw.previous(state.state())
 	end)
 
 	vim.keymap.set("n", config.key("quit"), function()
@@ -69,7 +70,7 @@ M.lsp_references = function()
 		return
 	end
 	state.reset()
-	ui.reset()
+	draw.reset()
 	lsp.symbol_references_entries(function(entries)
 		open(entries)
 	end)
@@ -82,8 +83,20 @@ M.lsp_diagnostics = function(bufnr)
 		return
 	end
 	state.reset()
-	ui.reset()
+	draw.reset()
 	open(lsp.diagnostic_entries(bufnr))
+end
+
+M.grep = function()
+	if _state.open then
+		vim.notify("multibuffer already open", vim.log.levels.WARN, {})
+		return
+	end
+	state.reset()
+	draw.reset()
+	grep.search(function(entries)
+		open(entries)
+	end)
 end
 
 M.marks = function()
@@ -92,7 +105,7 @@ M.marks = function()
 		return
 	end
 	state.reset()
-	ui.reset()
+	draw.reset()
 	open(editor.marks())
 end
 
@@ -102,7 +115,7 @@ M.quickfix = function()
 		return
 	end
 	state.reset()
-	ui.reset()
+	draw.reset()
 	open(qfx.quickfix_entries())
 end
 
@@ -114,7 +127,7 @@ M.lsp_definitions = function(filter)
 		return
 	end
 	state.reset()
-	ui.reset()
+	draw.reset()
 	lsp.symbol_definiton_entries(function(entries)
 		if #entries == 0 then
 			vim.notify("no results")
