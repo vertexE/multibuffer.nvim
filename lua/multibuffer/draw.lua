@@ -139,7 +139,7 @@ M.open = function(state, ctx)
 
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
 			title = title(entry, #state.entries),
-			border = { " ", " ", " ", " ", " ", " ", " ", " " }, -- ─
+			border = { " ", " ", " ", " ", " ", "─", " ", " " }, -- ─
 			relative = "win",
 			row = ((i - 1) * (PREVIEW_SIZE + 2)),
 			col = 0,
