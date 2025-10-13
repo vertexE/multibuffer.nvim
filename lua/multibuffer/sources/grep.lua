@@ -26,15 +26,21 @@ M.search = function(on_load, use_previous)
 			return
 		end
 
-		local result = vim.system({
+		local args = {
 			"rg",
 			"--vimgrep",
 			"--smart-case",
 			"--glob",
 			"!node_modules/**",
 			input,
-			use_previous and table.concat(previous_entry_filepaths, " ") or ".",
-		}, { text = true }):wait()
+		}
+		if use_previous then
+			vim.list_extend(args, previous_entry_filepaths)
+		else
+			table.insert(args, ".")
+		end
+		local result = vim.system(args, { text = true }):wait()
+
 		if result.stdout then
 			local lines = vim.split(result.stdout, "\n", { trimempty = true })
 			local entries = {}
