@@ -29,6 +29,7 @@ M.search = function(on_load, use_previous)
 		local result = vim.system({
 			"rg",
 			"--vimgrep",
+			"--smart-case",
 			"--glob",
 			"!node_modules/**",
 			input,
