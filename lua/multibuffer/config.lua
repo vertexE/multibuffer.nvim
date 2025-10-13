@@ -1,7 +1,7 @@
 local M = {}
 
 --- @class multibuffer.lsp.options
---- @field unique ?boolean  whether to filter out definitions that go to the same line
+--- @field unique ?boolean  whether to filter out definitions that go to the same line, by default true
 
 --- @class multibuffer.options
 --- @field lsp ?multibuffer.lsp.options
@@ -18,8 +18,7 @@ local default_options = {
 		["q"] = "quit",
 	},
 	lsp = {
-		--- filter options to unique per line
-		unique = false,
+		unique = true,
 	},
 }
 
