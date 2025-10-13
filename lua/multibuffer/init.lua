@@ -134,11 +134,6 @@ M.lsp_definitions = function(filter)
 			return
 		end
 
-		if #entries == 1 then
-			vim.lsp.buf.definition()
-			return
-		end
-
 		if filter then
 			local filtered_entries = vim.iter(entries)
 				:filter(function(e)
