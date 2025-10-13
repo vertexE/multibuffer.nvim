@@ -36,21 +36,29 @@ end
 
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_references_entries = function(on_load)
+	local should_filter_to_unique_by_line = config.options().lsp.unique
 	vim.lsp.buf.references(nil, {
 		on_list = function(result)
 			local entries = {}
+			local have_seen = {}
 			local references = result.items
 			for i, reference in ipairs(references) do
 				local bufnr = vim.fn.bufadd(reference.filename)
 				local path = vim.fn.fnamemodify(reference.filename, ":~:.")
-				table.insert(entries, {
-					index = i,
-					bufnr = bufnr,
-					lnum = reference.lnum - 1,
-					col = reference.col,
-					msg = reference.text,
-					fp = path,
-				})
+
+				if should_filter_to_unique_by_line and have_seen[path] == reference.lnum - 1 then
+				--- continue
+				else
+					have_seen[path] = reference.lnum - 1
+					table.insert(entries, {
+						index = i,
+						bufnr = bufnr,
+						lnum = reference.lnum - 1,
+						col = reference.col,
+						msg = reference.text,
+						fp = path,
+					})
+				end
 			end
 			on_load(entries)
 		end,
@@ -60,6 +68,7 @@ end
 --- @param bufnr integer|nil
 --- @return table<multibuffer.Entry>
 M.diagnostic_entries = function(bufnr)
+	local should_filter_to_unique_by_line = config.options().lsp.unique
 	local diagnostics = vim.diagnostic.get(bufnr)
 	local diagnostic_groups = group_by(diagnostics, function(a, b)
 		-- TODO: can pull this up into a config option
@@ -67,22 +76,29 @@ M.diagnostic_entries = function(bufnr)
 	end)
 
 	local entries = {}
+	local have_seen = {}
 	local i = 1
 	for _, group in ipairs(diagnostic_groups) do
 		local diagnostic = group[1]
 		if diagnostic and diagnostic.bufnr then
 			local name = vim.api.nvim_buf_get_name(diagnostic.bufnr)
 			local path = vim.fn.fnamemodify(name, ":~:.")
-			table.insert(entries, {
-				index = i,
-				bufnr = diagnostic.bufnr,
-				lnum = diagnostic.lnum,
-				severity = diagnostic.severity,
-				col = diagnostic.col,
-				msg = diagnostic.message,
-				fp = path,
-			})
-			i = i + 1
+
+			if should_filter_to_unique_by_line and have_seen[path] == diagnostic.lnum then
+				--- continue
+			else
+				have_seen[path] = diagnostic.lnum
+				table.insert(entries, {
+					index = i,
+					bufnr = diagnostic.bufnr,
+					lnum = diagnostic.lnum,
+					severity = diagnostic.severity,
+					col = diagnostic.col,
+					msg = diagnostic.message,
+					fp = path,
+				})
+				i = i + 1
+			end
 		end
 	end
 
@@ -91,7 +107,7 @@ end
 
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_definiton_entries = function(on_load)
-	local should_filter_to_unique_by_line = config.options().lsp.definition.unique
+	local should_filter_to_unique_by_line = config.options().lsp.unique
 	vim.lsp.buf_request(
 		0,
 		"textDocument/definition",

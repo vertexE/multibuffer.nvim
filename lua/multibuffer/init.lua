@@ -2,21 +2,22 @@ local M = {}
 
 local ui = require("multibuffer.ui")
 local state = require("multibuffer.state")
+local config = require("multibuffer.config")
 
 local lsp = require("multibuffer.sources.lsp")
 local editor = require("multibuffer.sources.editor")
 local qfx = require("multibuffer.sources.quickfix")
 
-local keys = { -- TODO: these belong in setup options
-	"<tab>",
-	"<s-tab>",
-	"<enter>",
-	"q",
-}
-
 local _state = {
 	open = false,
 }
+
+---@param opts ?multibuffer.options
+M.setup = function(opts)
+	if opts then
+		config.set_options(opts)
+	end
+end
 
 --- @param entries table<multibuffer.Entry>
 local open = function(entries)
@@ -30,62 +31,29 @@ local open = function(entries)
 		bufnr = bufnr,
 		winr = winr,
 	})
-	local previous_keymaps = {}
-	for _, keymap in ipairs(vim.api.nvim_get_keymap("n")) do
-		if vim.tbl_contains(keys, keymap.lhs) then
-			previous_keymaps[keymap.lhs] = keymap
-		end
-	end
 
-	vim.keymap.set("n", "<enter>", function()
+	vim.keymap.set("n", config.key("enter-file"), function()
 		vim.cmd("tabclose")
 		local entry = state.active()
 		vim.api.nvim_set_current_buf(entry.bufnr)
 		vim.cmd(string.format("normal! %dgg^zz", entry.lnum + 1))
 	end)
 
-	vim.keymap.set("n", "<tab>", function()
+	vim.keymap.set("n", config.key("forward"), function()
 		state.next()
 		ui.next(state.state())
 	end)
 
-	vim.keymap.set("n", "<s-tab>", function()
+	vim.keymap.set("n", config.key("backward"), function()
 		state.previous()
 		ui.previous(state.state())
 	end)
 
-	vim.keymap.set("n", "q", function()
+	vim.keymap.set("n", config.key("quit"), function()
 		if tbnr == vim.api.nvim_get_current_tabpage() then
 			vim.cmd("tabclose")
 		end
 	end)
-
-	vim.api.nvim_create_autocmd("TabClosed", {
-		group = vim.api.nvim_create_augroup("multibuffer.TabClosed", { clear = true }),
-		callback = function()
-			if not _state.open then
-				return -- don't modify keymaps if the multibuffer wasn't open
-			end
-
-			_state.open = false
-			if not vim.tbl_contains(vim.api.nvim_list_tabpages(), tbnr) then
-				for _, key in pairs(keys) do
-					if previous_keymaps[key] then
-						vim.fn.mapset(previous_keymaps[key])
-						local keymap = previous_keymaps[key]
-						vim.keymap.set("n", key, keymap.callback or keymap.rhs, {
-							desc = keymap.desc,
-							silent = keymap.silent,
-							noremap = keymap.noremap,
-							nowait = keymap.nowait,
-						})
-					else
-						vim.api.nvim_del_keymap("n", key)
-					end
-				end
-			end
-		end,
-	})
 end
 
 M.lsp_references = function()
