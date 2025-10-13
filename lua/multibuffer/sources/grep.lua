@@ -20,7 +20,7 @@ end
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 --- @param use_previous ?boolean
 M.search = function(on_load, use_previous)
-	vim.ui.input({ prompt = "grep" }, function(input)
+	vim.ui.input({ prompt = use_previous and "grep+" or "grep" }, function(input)
 		if not input or #input == 0 then
 			on_load({})
 			return
