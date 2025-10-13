@@ -54,6 +54,13 @@ local open = function(entries)
 			vim.cmd("tabclose")
 		end
 	end)
+
+	vim.api.nvim_create_autocmd("TabClosed", {
+		group = vim.api.nvim_create_augroup("multibuffer.tab.close", { clear = true }),
+		callback = function()
+			_state.open = false
+		end,
+	})
 end
 
 M.lsp_references = function()
