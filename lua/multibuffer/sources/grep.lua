@@ -26,13 +26,19 @@ M.search = function(on_load, use_previous)
 			return
 		end
 
-		local result = vim.system({
+		local result = vim.system(use_previous and {
 			"rg",
 			"--vimgrep",
 			"--glob",
 			"'!node_modules/**'",
 			input,
-			use_previous and table.concat(previous_entry_filepaths, " ") or "*",
+			table.concat(previous_entry_filepaths, " "),
+		} or {
+			"rg",
+			"--vimgrep",
+			"--glob",
+			"'!node_modules/**'",
+			input,
 		}, { text = true }):wait()
 		vim.print(result)
 		if result.stdout then
