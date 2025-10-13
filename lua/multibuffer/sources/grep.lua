@@ -30,7 +30,8 @@ M.search = function(on_load, use_previous)
 			"'!node_modules/**'",
 			input,
 			use_previous and table.concat(previous_entry_filepaths, " ") or "*",
-		}):wait()
+		}, { text = true }):wait()
+		vim.print(result)
 		if result.stdout then
 			local lines = vim.split(result.stdout, "\n")
 			local entries = {}
