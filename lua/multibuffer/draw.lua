@@ -21,10 +21,14 @@ local windows = {}
 
 local cursor = 1
 
-local title = function(entry)
+---@param entry multibuffer.Entry|multibuffer.Placement
+---@param total integer
+---@return table<table<string>>
+local title = function(entry, total)
 	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
 	local name = vim.fn.fnamemodify(buf_name, ":t")
 	return {
+		{ string.format("%d/%d ", entry.index, total), "MiniIconsOrange" },
 		{ name .. string.format(":%d", entry.lnum), "Comment" },
 	}
 end
@@ -72,7 +76,7 @@ M.next = function(state)
 				end
 				vim.wo[_winr].winbar = ""
 				local entry = placement[_winr]
-				vim.api.nvim_win_set_config(_winr, { title = title(entry) })
+				vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
 			end
 		end
 	end
@@ -109,7 +113,7 @@ M.previous = function(state)
 			end
 			vim.wo[_winr].winbar = ""
 			local entry = placement[_winr]
-			vim.api.nvim_win_set_config(_winr, { title = title(entry) })
+			vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
 		end
 	end
 end
@@ -134,7 +138,7 @@ M.open = function(state, ctx)
 		end
 
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
-			title = title(entry),
+			title = title(entry, #state.entries),
 			border = { " ", " ", " ", " ", " ", " ", " ", " " }, -- ─
 			relative = "win",
 			row = ((i - 1) * (PREVIEW_SIZE + 2)),
