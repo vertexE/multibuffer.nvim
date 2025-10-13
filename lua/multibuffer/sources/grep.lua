@@ -20,7 +20,7 @@ end
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 --- @param use_previous ?boolean
 M.search = function(on_load, use_previous)
-	vim.ui.input({}, function(input)
+	vim.ui.input({ prompt = "grep" }, function(input)
 		if not input or #input == 0 then
 			on_load({})
 			return
@@ -31,7 +31,7 @@ M.search = function(on_load, use_previous)
 			"--vimgrep",
 			"--glob",
 			"'!node_modules/**'",
-			input,
+			string.format("'%s'", input),
 			use_previous and table.concat(previous_entry_filepaths, " ") or ".",
 		}, { text = true }):wait()
 		vim.print(result)
