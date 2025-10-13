@@ -7,7 +7,9 @@ local previous_entry_filepaths = {}
 ---@param line string
 ---@return multibuffer.Entry
 local parse_rg_line = function(i, line)
+	vim.print(line)
 	local segments = vim.split(line, ":")
+	vim.print(segments)
 	-- local msg = table.concat(segments, ":", 4)
 	local path = segments[1]
 	local lnum = segments[2] and tonumber(segments[2]) or nil
