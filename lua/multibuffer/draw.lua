@@ -11,7 +11,9 @@ local PREVIEW_SIZE = 7
 --- @field bufnr integer
 --- @field lnum integer
 --- @field msg string
+--- @field fp string filepath
 --- @field severity ?vim.diagnostic.Severity
+--- @field lazy ?boolean if true, then bufnr is -1 and we need to load the file into a buffer first
 
 --- @type table<integer,multibuffer.Placement>
 local placement = {}
@@ -57,6 +59,9 @@ M.next = function(state)
 			local win = windows[cursor]
 			vim.api.nvim_set_current_win(win)
 		else
+			if next_entry.lazy and next_entry.bufnr == -1 then
+				next_entry.bufnr = vim.uri_to_bufnr(vim.uri_from_fname(next_entry.fp))
+			end
 			for i, _winr in ipairs(windows) do
 				if i == #windows then
 					vim.api.nvim_win_set_buf(_winr, next_entry.bufnr)
@@ -66,7 +71,9 @@ M.next = function(state)
 						bufnr = next_entry.bufnr,
 						lnum = next_entry.lnum,
 						msg = next_entry.msg,
+						fp = next_entry.fp,
 						severity = next_entry.severity,
+						lazy = next_entry.lazy,
 					}
 				else
 					local next_pl = placement[windows[i + 1]]
@@ -102,7 +109,9 @@ M.previous = function(state)
 					bufnr = prev_entry.bufnr,
 					lnum = prev_entry.lnum,
 					msg = prev_entry.msg,
+					fp = prev_entry.fp,
 					severity = prev_entry.severity,
+					lazy = prev_entry.lazy,
 				}
 				vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
 				scroll_in(_winr, prev_entry.lnum + 1)
@@ -137,6 +146,10 @@ M.open = function(state, ctx)
 			break
 		end
 
+		if entry.lazy and entry.bufnr == -1 then
+			entry.bufnr = vim.uri_to_bufnr(vim.uri_from_fname(entry.fp))
+		end
+
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
 			title = title(entry, #state.entries),
 			border = { " ", " ", " ", " ", " ", "─", " ", " " }, -- ─
@@ -156,7 +169,9 @@ M.open = function(state, ctx)
 			bufnr = entry.bufnr,
 			lnum = entry.lnum,
 			msg = entry.msg,
+			fp = entry.fp,
 			severity = entry.severity,
+			lazy = entry.lazy,
 		}
 	end
 	vim.api.nvim_set_current_win(windows[1])

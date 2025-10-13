@@ -8,6 +8,7 @@
 --- @field lnum integer
 --- @field col? integer
 --- @field severity? vim.diagnostic.Severity
+--- @field lazy? boolean
 --- @field msg string
 --- @field fp string filepath
 
