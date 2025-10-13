@@ -27,9 +27,8 @@ local cursor = 1
 local title = function(entry, total)
 	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
 	local name = vim.fn.fnamemodify(buf_name, ":t")
-    vim.print(entry)
 	return {
-		{ string.format("%d/%d ", entry.index, total), "MiniIconsOrange" },
+		{ string.format("%d/%d ", entry.index or entry.id, total), "MiniIconsOrange" },
 		{ name .. string.format(":%d", entry.lnum), "Comment" },
 	}
 end
