@@ -30,8 +30,8 @@ M.search = function(on_load, use_previous)
 			"rg",
 			"--vimgrep",
 			"--glob",
-			"'!node_modules/**'",
-			string.format("'%s'", input),
+			"!node_modules/**",
+			input,
 			use_previous and table.concat(previous_entry_filepaths, " ") or ".",
 		}, { text = true }):wait()
 		vim.print(result)
