@@ -14,9 +14,15 @@ M.search = function(on_load, use_previous)
 		end
 
 		if use_previous and #previous_entry_filepaths > 0 then
-			vim.cmd(string.format("vimgrep /%s/j %s", input, table.concat(previous_entry_filepaths, " ")))
+			vim.cmd(
+				string.format(
+					"grep --glob '!node_modules/**' %s %s | cwindow | cfirst | cclose",
+					input,
+					table.concat(previous_entry_filepaths, " ")
+				)
+			)
 		else
-			vim.cmd(string.format("vimgrep /%s/j ./**", input))
+			vim.cmd(string.format("grep --glob '!node_modules/**' %s * | cwindow | cfirst | cclose", input))
 		end
 		local entries = qfx.quickfix_entries()
 		previous_entry_filepaths = vim.iter(entries)
