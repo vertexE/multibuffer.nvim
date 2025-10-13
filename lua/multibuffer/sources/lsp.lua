@@ -42,7 +42,8 @@ M.symbol_references_entries = function(on_load)
 			local entries = {}
 			local have_seen = {}
 			local references = result.items
-			for i, reference in ipairs(references) do
+			local i = 1
+			for _, reference in ipairs(references) do
 				local bufnr = vim.fn.bufadd(reference.filename)
 				local path = vim.fn.fnamemodify(reference.filename, ":~:.")
 
@@ -58,6 +59,7 @@ M.symbol_references_entries = function(on_load)
 						msg = reference.text,
 						fp = path,
 					})
+					i = i + 1
 				end
 			end
 			on_load(entries)
@@ -120,7 +122,8 @@ M.symbol_definiton_entries = function(on_load)
 			--- @type table<string,string> mapping of file->ln, check if exact match
 			local have_seen = {}
 			local entries = {}
-			for i, symbol in ipairs(result) do
+			local i = 1
+			for _, symbol in ipairs(result) do
 				local bufnr = vim.uri_to_bufnr(symbol.targetUri)
 				vim.fn.bufload(bufnr)
 				local preview = vim.api.nvim_buf_get_lines(
@@ -143,6 +146,7 @@ M.symbol_definiton_entries = function(on_load)
 						msg = preview,
 						fp = path,
 					})
+					i = i + 1
 				end
 			end
 			on_load(entries)
