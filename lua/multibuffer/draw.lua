@@ -21,29 +21,15 @@ local windows = {}
 
 local cursor = 1
 
-local sev_to_icon = {
-	[vim.diagnostic.severity.ERROR] = "󰅙 ",
-	[vim.diagnostic.severity.WARN] = " ",
-	[vim.diagnostic.severity.HINT] = " ",
-	[vim.diagnostic.severity.INFO] = " ",
-}
-
-local sev_to_hl = {
-	[vim.diagnostic.severity.ERROR] = "DiagnosticError",
-	[vim.diagnostic.severity.WARN] = "DiagnosticWarn",
-	[vim.diagnostic.severity.HINT] = "DiagnosticHint",
-	[vim.diagnostic.severity.INFO] = "DiagnosticInfo",
-}
-
-local title = function(entry)
+---@param entry multibuffer.Entry|multibuffer.Placement
+---@param total integer
+---@return table<table<string>>
+local title = function(entry, total)
 	local buf_name = vim.api.nvim_buf_get_name(entry.bufnr)
 	local name = vim.fn.fnamemodify(buf_name, ":t")
-	local hl_group = entry.severity and sev_to_hl[entry.severity] or "MiniIconsPurple"
 	return {
+		{ string.format("%d/%d ", entry.index or entry.id, total), "MiniIconsOrange" },
 		{ name .. string.format(":%d", entry.lnum), "Comment" },
-		{ " ", "Comment" },
-		{ entry.severity and sev_to_icon[entry.severity] or "", hl_group },
-		{ entry.msg or "", hl_group },
 	}
 end
 
@@ -90,7 +76,7 @@ M.next = function(state)
 				end
 				vim.wo[_winr].winbar = ""
 				local entry = placement[_winr]
-				vim.api.nvim_win_set_config(_winr, { title = title(entry) })
+				vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
 			end
 		end
 	end
@@ -127,7 +113,7 @@ M.previous = function(state)
 			end
 			vim.wo[_winr].winbar = ""
 			local entry = placement[_winr]
-			vim.api.nvim_win_set_config(_winr, { title = title(entry) })
+			vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
 		end
 	end
 end
@@ -152,7 +138,7 @@ M.open = function(state, ctx)
 		end
 
 		local _winr = vim.api.nvim_open_win(entry.bufnr, false, {
-			title = title(entry),
+			title = title(entry, #state.entries),
 			border = { " ", " ", " ", " ", " ", " ", " ", " " }, -- ─
 			relative = "win",
 			row = ((i - 1) * (PREVIEW_SIZE + 2)),

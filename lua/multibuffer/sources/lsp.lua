@@ -1,5 +1,7 @@
 local M = {}
 
+local config = require("multibuffer.config")
+
 --- @param t table
 --- @param comparator fun(a: any,b: any):boolean
 local group_by = function(t, comparator)
@@ -34,21 +36,31 @@ end
 
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_references_entries = function(on_load)
+	local should_filter_to_unique_by_line = config.options().lsp.unique
 	vim.lsp.buf.references(nil, {
 		on_list = function(result)
 			local entries = {}
+			local have_seen = {}
 			local references = result.items
-			for i, reference in ipairs(references) do
+			local i = 1
+			for _, reference in ipairs(references) do
 				local bufnr = vim.fn.bufadd(reference.filename)
 				local path = vim.fn.fnamemodify(reference.filename, ":~:.")
-				table.insert(entries, {
-					index = i,
-					bufnr = bufnr,
-					lnum = reference.lnum - 1,
-					col = reference.col,
-					msg = reference.text,
-					fp = path,
-				})
+
+				if should_filter_to_unique_by_line and have_seen[path] == reference.lnum - 1 then
+				--- continue
+				else
+					have_seen[path] = reference.lnum - 1
+					table.insert(entries, {
+						index = i,
+						bufnr = bufnr,
+						lnum = reference.lnum - 1,
+						col = reference.col,
+						msg = reference.text,
+						fp = path,
+					})
+					i = i + 1
+				end
 			end
 			on_load(entries)
 		end,
@@ -58,6 +70,7 @@ end
 --- @param bufnr integer|nil
 --- @return table<multibuffer.Entry>
 M.diagnostic_entries = function(bufnr)
+	local should_filter_to_unique_by_line = config.options().lsp.unique
 	local diagnostics = vim.diagnostic.get(bufnr)
 	local diagnostic_groups = group_by(diagnostics, function(a, b)
 		-- TODO: can pull this up into a config option
@@ -65,22 +78,29 @@ M.diagnostic_entries = function(bufnr)
 	end)
 
 	local entries = {}
+	local have_seen = {}
 	local i = 1
 	for _, group in ipairs(diagnostic_groups) do
 		local diagnostic = group[1]
 		if diagnostic and diagnostic.bufnr then
 			local name = vim.api.nvim_buf_get_name(diagnostic.bufnr)
 			local path = vim.fn.fnamemodify(name, ":~:.")
-			table.insert(entries, {
-				index = i,
-				bufnr = diagnostic.bufnr,
-				lnum = diagnostic.lnum,
-				severity = diagnostic.severity,
-				col = diagnostic.col,
-				msg = diagnostic.message,
-				fp = path,
-			})
-			i = i + 1
+
+			if should_filter_to_unique_by_line and have_seen[path] == diagnostic.lnum then
+				--- continue
+			else
+				have_seen[path] = diagnostic.lnum
+				table.insert(entries, {
+					index = i,
+					bufnr = diagnostic.bufnr,
+					lnum = diagnostic.lnum,
+					severity = diagnostic.severity,
+					col = diagnostic.col,
+					msg = diagnostic.message,
+					fp = path,
+				})
+				i = i + 1
+			end
 		end
 	end
 
@@ -89,6 +109,7 @@ end
 
 --- @param on_load fun(entries: table<multibuffer.Entry>)
 M.symbol_definiton_entries = function(on_load)
+	local should_filter_to_unique_by_line = config.options().lsp.unique
 	vim.lsp.buf_request(
 		0,
 		"textDocument/definition",
@@ -96,9 +117,13 @@ M.symbol_definiton_entries = function(on_load)
 		function(_, result, _, _)
 			if not result then
 				on_load({})
+				return
 			end
+			--- @type table<string,string> mapping of file->ln, check if exact match
+			local have_seen = {}
 			local entries = {}
-			for i, symbol in ipairs(result) do
+			local i = 1
+			for _, symbol in ipairs(result) do
 				local bufnr = vim.uri_to_bufnr(symbol.targetUri)
 				vim.fn.bufload(bufnr)
 				local preview = vim.api.nvim_buf_get_lines(
@@ -108,14 +133,21 @@ M.symbol_definiton_entries = function(on_load)
 					false
 				)[1] or ""
 				local path = symbol.targetUri:gsub("^file://", "", 1)
-				table.insert(entries, {
-					index = i,
-					bufnr = bufnr,
-					lnum = symbol.targetRange.start.line,
-					col = symbol.targetRange.start.character,
-					msg = preview,
-					fp = path,
-				})
+
+				if should_filter_to_unique_by_line and have_seen[path] == symbol.targetRange.start.line then
+					--- continue
+				else
+					have_seen[path] = symbol.targetRange.start.line
+					table.insert(entries, {
+						index = i,
+						bufnr = bufnr,
+						lnum = symbol.targetRange.start.line,
+						col = symbol.targetRange.start.character,
+						msg = preview,
+						fp = path,
+					})
+					i = i + 1
+				end
 			end
 			on_load(entries)
 		end
