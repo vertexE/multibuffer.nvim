@@ -52,49 +52,56 @@ M.next = function(state)
 		cursor = cursor + 1
 		local win = windows[cursor]
 		vim.api.nvim_set_current_win(win)
-	else -- cursor is now in the "middle" of the parent window
-		local next_entry = state.entries[placement[windows[#windows]].id + 1]
-		if not next_entry then
-			cursor = cursor + 1
-			local win = windows[cursor]
-			vim.api.nvim_set_current_win(win)
+		return
+	end
+
+	-- cursor is now in the "middle" of the parent window
+	local next_entry = state.entries[placement[windows[#windows]].id + 1]
+	if not next_entry then
+		cursor = cursor + 1
+		local win = windows[cursor]
+		vim.api.nvim_set_current_win(win)
+		return
+	end
+	if next_entry.lazy and next_entry.bufnr == -1 then
+		next_entry.bufnr = vim.uri_to_bufnr(vim.uri_from_fname(next_entry.fp))
+		vim.fn.bufload(next_entry.bufnr)
+	end
+
+	for i, _winr in ipairs(windows) do
+		if i == #windows then
+			vim.api.nvim_win_set_buf(_winr, next_entry.bufnr)
+			scroll_in(_winr, next_entry.lnum + 1)
+			placement[_winr] = {
+				id = next_entry.index,
+				bufnr = next_entry.bufnr,
+				lnum = next_entry.lnum,
+				msg = next_entry.msg,
+				fp = next_entry.fp,
+				severity = next_entry.severity,
+				lazy = next_entry.lazy,
+			}
 		else
-			if next_entry.lazy and next_entry.bufnr == -1 then
-				next_entry.bufnr = vim.uri_to_bufnr(vim.uri_from_fname(next_entry.fp))
-				vim.fn.bufload(next_entry.bufnr)
-			end
-			for i, _winr in ipairs(windows) do
-				if i == #windows then
-					vim.api.nvim_win_set_buf(_winr, next_entry.bufnr)
-					scroll_in(_winr, next_entry.lnum + 1)
-					placement[_winr] = {
-						id = next_entry.index,
-						bufnr = next_entry.bufnr,
-						lnum = next_entry.lnum,
-						msg = next_entry.msg,
-						fp = next_entry.fp,
-						severity = next_entry.severity,
-						lazy = next_entry.lazy,
-					}
-				else
-					local next_pl = placement[windows[i + 1]]
-					placement[_winr] = next_pl
-					vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
-					scroll_in(_winr, placement[_winr].lnum + 1)
-				end
-				vim.wo[_winr].winbar = ""
-				local entry = placement[_winr]
-				vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
-			end
+			local next_pl = placement[windows[i + 1]]
+			placement[_winr] = next_pl
+			vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
+			scroll_in(_winr, placement[_winr].lnum + 1)
 		end
+		vim.wo[_winr].winbar = ""
+		local entry = placement[_winr]
+		vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
 	end
 end
-
--- BUG: special case for when I'm on the last item, I should just move the cursor to the middle float!
 
 --- @param state multibuffer.State
 M.previous = function(state)
 	if cursor == 1 then
+		return
+	end
+	if cursor == #windows then
+		cursor = cursor - 1
+		local win = windows[cursor]
+		vim.api.nvim_set_current_win(win)
 		return
 	end
 
@@ -103,30 +110,31 @@ M.previous = function(state)
 		cursor = cursor - 1
 		local prev_win = windows[cursor]
 		vim.api.nvim_set_current_win(prev_win)
-	else
-		for i = #windows, 1, -1 do
-			local _winr = windows[i]
-			if i == 1 then
-				placement[_winr] = {
-					id = prev_entry.index,
-					bufnr = prev_entry.bufnr,
-					lnum = prev_entry.lnum,
-					msg = prev_entry.msg,
-					fp = prev_entry.fp,
-					severity = prev_entry.severity,
-					lazy = prev_entry.lazy,
-				}
-				vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
-				scroll_in(_winr, prev_entry.lnum + 1)
-			else
-				placement[_winr] = placement[windows[i - 1]]
-				vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
-				scroll_in(_winr, placement[_winr].lnum + 1)
-			end
-			vim.wo[_winr].winbar = ""
-			local entry = placement[_winr]
-			vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
+		return
+	end
+
+	for i = #windows, 1, -1 do
+		local _winr = windows[i]
+		if i == 1 then
+			placement[_winr] = {
+				id = prev_entry.index,
+				bufnr = prev_entry.bufnr,
+				lnum = prev_entry.lnum,
+				msg = prev_entry.msg,
+				fp = prev_entry.fp,
+				severity = prev_entry.severity,
+				lazy = prev_entry.lazy,
+			}
+			vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
+			scroll_in(_winr, prev_entry.lnum + 1)
+		else
+			placement[_winr] = placement[windows[i - 1]]
+			vim.api.nvim_win_set_buf(_winr, placement[_winr].bufnr)
+			scroll_in(_winr, placement[_winr].lnum + 1)
 		end
+		vim.wo[_winr].winbar = ""
+		local entry = placement[_winr]
+		vim.api.nvim_win_set_config(_winr, { title = title(entry, #state.entries) })
 	end
 end
 
